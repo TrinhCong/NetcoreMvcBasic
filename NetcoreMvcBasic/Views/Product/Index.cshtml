@@ -1,0 +1,966 @@
+﻿@{
+    //ViewData["Title"] = "Home Page";
+    Layout = null;
+}
+<link href="~/lib/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet" />
+<script src="~/lib/jquery/dist/jquery.min.js"></script>
+<script src="~/lib/bootstrap/dist/js/bootstrap.min.js"></script>
+
+<div class="container">
+    <br />
+    <div class="row">
+        <div class="col-md-12">
+            <div class="col-md-2 float-left" style="margin-right:-60px;">
+                <form action="" method="post" id="formUpload">
+                    <div class="col-md-2">
+                        <input type="button" class="btn btn-danger" id="btnUpload" value="Nhập Excel" />
+                        <h5>Chọn tệp:</h5>
+                        <input type="file" id="inputFile" name="importFile" value="" />
+                    </div>
+                </form>
+            </div>
+            <div class="col-md-2 float-left" style="margin-right:-80px;">
+                <a href="#" id="btnKetXuat" class="btn btn-primary">Xuất Excel</a>
+            </div>
+            <div class="col-md-2 float-left" style="margin-right:-60px;">
+                <a href="~/assets/TestFile/ExcelDemo.xlsx" class="btn btn-warning" download>
+                    Tải biểu mẫu
+                </a>
+            </div>
+            <div class="col-md-2 float-left" style="margin-right:200px;">
+                <p>
+                    <a id="addNew" class="btn btn-success" href="#">+ Thêm mới</a>
+                </p>
+            </div>
+            <div class="col-md-4 float-left justify-content-end">
+                <div class="btn-group form-actions">
+                    <header id="clearSearch">
+                        Tìm:
+                        <input style="font-size:15px;" id="txtSearch" type="text" name="SearchString" value="@ViewData[" CurrentFilter"]" />
+                        <span style="font-size:22px;">&times;</span>
+                        <input style="font-size:15px;" id="btnSearch" type="button" value="Tìm kiếm" class="btn btn-info" />
+
+                    </header>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-header">
+            <div class="row">
+                <div class="col-md-12 text-center">
+                    <h2 class="text-uppercase">Danh sách sản phẩm</h2>
+                </div>
+            </div>
+            <br />
+            <div class="row">
+                <input type="hidden" id="lastpage" value="@ViewBag.LastPage" />
+
+                <div style="margin-left:20px;" class="col-md-2">
+                    <select value="@ViewData[" CategoryId"]" type="text" class="form-control" name="category_id" id="categoryList">
+                        <option value="0">Danh mục</option>
+                        @foreach (var p in @ViewBag.GetCategory)
+                        {
+                            <option value="@p.category_id">@p.category_name</option>
+                        }
+                    </select>
+                </div>
+
+                <div class="col-md-2">
+                    <select value="@ViewData[" SupplierId"]" type="text" class="form-control" id="supplierList">
+                        <option value="0">Nhà cung cấp</option>
+                        @foreach (var s in @ViewBag.GetSupplier)
+                        {
+                            <option value="@s.supplier_id">@s.company_name</option>
+                        }
+                    </select>
+                </div>
+
+                <div class="col-md-2">
+                    <select type="text" class="form-control" id="discount">
+                        <option value="0">Giảm giá</option>
+                        <option value="1">Có</option>
+                        <option value="-1">Không</option>
+                    </select>
+                </div>
+                <div class="col-md-4 offset-1">
+                    <label style="margin-left:200px;margin-top:10px;" class="control-label"><b>Số lượng tồn kho:</b></label>
+                </div>
+            </div>
+            <br />
+            <div class="row" style="margin-top:-20px;">
+                <div class="col-md-12 clearfix">
+                    <div class="col-md-6" style="margin-left:850px;">
+                        <label class="control-label">Từ:</label>
+                        <input type="text" name="minStock" />
+                    </div>
+                    <div class="col-md-6" style="margin-left:840px;">
+                        <label>Đến:</label>
+                        <input type="text" name="maxStock" />
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-12" style="margin-left:890px;">
+
+                    <input class="btn btn-info" type="button" name="searchStock" value="Tìm" />
+
+                </div>
+            </div>
+        </div>
+        <br />
+        <div class="card-body">
+            <div id="main_table">
+
+            </div>
+        </div>
+    </div>
+
+    <style>
+        #clearSearch {
+            position: relative;
+        }
+
+            #clearSearch span {
+                position: absolute;
+                top: 0px;
+                left: 195px;
+                display: none;
+                cursor: pointer;
+                font-weight: 700;
+                color: darkblue;
+            }
+    </style>
+
+    <!--Show Modal Add Dialog-->
+    <div class="modal fade" id="myInsertModal" tabindex="-1" role="dialog" aria-labelledby="addModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" id="addModalLabel">Thêm mới</h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form>
+                        <div class="alert alert-danger" style="display:none">
+
+                        </div>
+                        <div class="form-group">
+                            <label for="" class="control-label">Tên hàng<span class="required">*</span></label>
+                            <input type="text" class="form-control" id="product_name" />
+                            <span style="color:red" class="nhacnho"></span>
+                        </div>
+                        <div class="form-group">
+                            <label for="" class="control-label">Danh mục<span class="required">*</span></label>
+                            <select type="text" class="form-control" id="cate_id" required>
+                                @foreach (var item in ViewBag.GetCategory)
+                                {
+                                    <option value="@item.category_id">@item.category_name</option>
+                                }
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="" class="control-label">Nhà cung cấp<span class="required">*</span></label>
+                            <select type="text" class="form-control" id="supplier_id" required>
+                                @foreach (var item in ViewBag.GetSupplier)
+                                {
+                                    <option value="@item.supplier_id">@item.company_name</option>
+                                }
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="" class="control-label">Quy cách<span class="required">*</span></label>
+                            <input type="text" class="form-control" id="_quantityPerUnit" required />
+                            <span style="color:red" class="nhacnho"></span>
+                        </div>
+                        <div class="form-group">
+                            <label for="" class="control-label">Đơn giá<span class="required">*</span></label>
+                            <input type="number" min="0" step="1.00" class="form-control" id="_unitPrice" required />
+                            <span style="color:red" class="nhacnho"></span>
+                        </div>
+                        <div class="form-group">
+                            <label for="" class="control-label">Số lượng tồn<span class="required">*</span></label>
+                            <input type="number" min="1" step="1" class="form-control" id="_unitInStock" required />
+                            <span style="color:red" class="nhacnho"></span>
+                        </div>
+                        <div class="form-group">
+                            <label for="" class="control-label">Đ/v xuất bán<span class="required">*</span></label>
+                            <input type="number" min="1" step="1" class="form-control" id="_unitOrder" required />
+                            <span style="color:red" class="nhacnho"></span>
+                        </div>
+                        <div class="form-group">
+                            <label for="" class="control-label">Đặt hàng lại<span class="required">*</span></label>
+                            <input type="number" min="0" max="1" step="1" class="form-control" id="_reorder" required />
+                            <span style="color:red" class="nhacnho"></span>
+                        </div>
+                        <div class="form-group">
+                            <label class="control-label">Giảm giá:</label>
+                            Có
+                            <input type="radio" value="1" name="_discontinued" checked />
+                            Không
+                            <input type="radio" value="0" name="_discontinued" />
+                        </div>
+                        <div class="modal-footer">
+                            <div style="margin:auto">
+                                <button id="btnClose" type="button" class="btn btn-danger" data-dismiss="modal">Đóng</button>
+                                <button type="button" class="btn btn-primary add">Lưu</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!--Show Modal Update Dialog-->
+    <div class="modal fade" id="myUpdateModal" tabindex="-1" role="dialog" aria-labelledby="updateModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" id="updateModalLabel">Thông Tin Sản phẩm</h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form>
+                        <div class="form-group">
+                            <input type="hidden" class="form-control" id="productId" placeholder="Id" />
+                        </div>
+                        <div class="alert alert-danger" style="display:none">
+
+                        </div>
+                        <div class="form-group">
+                            <label for="" class="control-label">Tên hàng<span class="required">*</span></label>
+                            <input type="text" class="form-control" id="Name" placeholder="Name" />
+
+                        </div>
+                        <div class="form-group">
+                            <label for="" class="control-label">Danh mục<span class="required">*</span></label>
+                            <select type="text" class="form-control" id="cat_id" required>
+                                @foreach (var item in ViewBag.GetCategory)
+                                {
+                                    <option value="@item.category_id">@item.category_name</option>
+                                }
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="" class="control-label">Nhà cung cấp<span class="required">*</span></label>
+                            <select type="text" class="form-control" id="sup_id" required>
+                                @foreach (var item in ViewBag.GetSupplier)
+                                {
+                                    <option value="@item.supplier_id">@item.company_name</option>
+                                }
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="" class="control-label">Quy cách<span class="required">*</span></label>
+                            <input type="text" class="form-control" id="quantity_per_unit" required />
+
+                        </div>
+                        <div class="form-group">
+                            <label for="" class="control-label">Đơn giá<span class="required">*</span></label>
+                            <input type="number" min="0" step="1.00" class="form-control" id="unit_price" required />
+
+                        </div>
+                        <div class="form-group">
+                            <label for="" class="control-label">Số lượng tồn<span class="required">*</span></label>
+                            <input type="number" min="1" step="1" class="form-control" id="units_in_stock" required />
+                        </div>
+                        <div class="form-group">
+                            <label for="" class="control-label">Đ/v xuất bán<span class="required">*</span></label>
+                            <input type="number" min="1" step="1" class="form-control" id="units_on_order" required />
+
+                        </div>
+                        <div class="form-group">
+                            <label for="" class="control-label">Đặt hàng lại<span class="required">*</span></label>
+                            <input type="number" min="0" max="1" step="1" class="form-control" id="reorder" required />
+
+                        </div>
+                        <div class="form-group">
+                            <label class="control-label">Giảm giá:</label>
+                            Có
+                            <input id="rd1" type="radio" value="1" name="discontinued" />
+                            Không
+                            <input id="rd2" type="radio" value="0" name="discontinued" />
+                        </div>
+                        <div class="modal-footer">
+                            <div style="margin:auto">
+                                <button type="button" class="btn btn-danger" data-dismiss="modal">Đóng</button>
+                                <button type="button" class="btn btn-primary update">Lưu</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!--Show Modal Detail Dialog-->
+    <div class="modal fade" id="myDetailModal" tabindex="-1" role="dialog" aria-labelledby="detailModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" id="detailModalLabel">Chi tiết Sản phẩm</h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form>
+                        <div class="form-group">
+                            <input type="hidden" class="form-control" id="detailId" placeholder="Id" />
+                        </div>
+
+                        <div class="form-group">
+                            <label for="" class="control-label">Tên hàng<span class="required">*</span></label>
+                            <input type="text" class="form-control" id="nameDetail" readonly />
+
+                        </div>
+                        <div class="form-group">
+                            <label for="" class="control-label">Danh mục<span class="required">*</span></label>
+                            <select type="text" class="form-control" id="cat_id_detail" required>
+                                @foreach (var item in ViewBag.GetCategory)
+                                {
+                                    <option value="@item.category_id">@item.category_name</option>
+                                }
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="" class="control-label">Nhà cung cấp<span class="required">*</span></label>
+                            <select type="text" class="form-control" id="sup_id_detail" required>
+                                @foreach (var item in ViewBag.GetSupplier)
+                                {
+                                    <option value="@item.supplier_id">@item.company_name</option>
+                                }
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="" class="control-label">Quy cách<span class="required">*</span></label>
+                            <input type="text" class="form-control" id="quantity_per_unit_detail" required readonly />
+
+                        </div>
+                        <div class="form-group">
+                            <label for="" class="control-label">Đơn giá<span class="required">*</span></label>
+                            <input type="number" min="0" step="1.00" class="form-control" id="unit_price_detail" required readonly />
+
+                        </div>
+                        <div class="form-group">
+                            <label for="" class="control-label">Số lượng tồn<span class="required">*</span></label>
+                            <input type="number" min="1" step="1" class="form-control" id="units_in_stock_detail" required readonly />
+                        </div>
+                        <div class="form-group">
+                            <label for="" class="control-label">Đ/v xuất bán<span class="required">*</span></label>
+                            <input type="number" min="1" step="1" class="form-control" id="units_on_order_detail" required readonly />
+
+                        </div>
+                        <div class="form-group">
+                            <label for="" class="control-label">Đặt hàng lại<span class="required">*</span></label>
+                            <input type="number" min="1" step="1" class="form-control" id="reorder_detail" required readonly />
+
+                        </div>
+                        <div class="form-group">
+                            <label class="control-label">Giảm giá:</label>
+                            Có
+                            <input id="giamgia1" type="radio" value="1" name="discontinued_detail" readonly />
+                            Không
+                            <input id="giamgia2" type="radio" value="0" name="discontinued_detail" readonly />
+                        </div>
+                        <div class="modal-footer">
+
+                            <button type="button" class="btn btn-warning" data-dismiss="modal">Quay lại</button>
+
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    @*@await  Html.PartialAsync("_ResultTable")*@
+</div>
+
+<script>
+    var deleteX = function () {
+        var value = $("#txtSearch").val();
+        if (value.length > 0) {
+            $("#txtSearch").val('');
+            filter();
+            $(this).css('display', 'none');
+            $("#txtSearch").focus();
+        }
+    }
+
+    var toggleClearSearch = function () {
+        var keyword = $("#txtSearch").val();
+        if (keyword.length > 0) {
+            $("#clearSearch span").css('display', 'block');
+        }
+        else {
+            $("#clearSearch span").css('display', 'none');
+        }
+    }
+
+    var reActivePagination = function () {
+        $("ul.pagination li a").on('click', function (e) {
+            e.preventDefault();
+            var p = $(this).text();
+            $("ul.pagination li").removeClass('active');
+            var parent = $(this).parent('li');
+            parent.addClass('active');
+            parent.html("<span>" + p + "</span>");
+
+            filter();
+        });
+    };
+
+    var getResultSearch = function () {
+        var keyword = $("#txtSearch").val();
+        var cateId = $("#categoryList").val();
+        var supId = $("#supplierList").val();
+        var discount = $("#discount").val();
+        var min = $("#minStock").val();
+        var max = $("#maxStock").val();
+        $("main_table").html("Đang tải....");
+        $.post("/product/GetTable", {
+            searchString: keyword,
+            cateId: cateId,
+            supId: supId,
+            discount: discount,
+            minStock: min,
+            maxStock: max
+        }).then(xhr => {
+            $("#main_table").html(xhr);
+            reActivePagination();
+            $("[data-id]").on('click', deleteProduct);
+        });
+    };
+
+    var showListSup = function () {
+        var cateId = $("#categoryList option:selected").val();
+        $.ajax({
+            type: "GET",
+            data: { cateId: cateId },
+            url: "/Product/loadSupplier",
+            contentType: "application/json;charset=utf-8",
+            dataType: "json",
+            success: function (result) {
+                var s = '<option value="0">Nhà cung cấp</option>';
+                for (var i = 0; i < result.length; i++) {
+                    s += '<option value="' + result[i].supplier_id + '">' + result[i].company_name + '</option>'
+                }
+                $("#supplierList").html(s);
+            }
+        });
+    };
+
+    function clearTextBox() {
+        $(".alert-danger").hide();
+        $("#product_name").val('');
+        $("#cate_id").val('');
+        $("#supplier_id").val('');
+        $("#_quantityPerUnit").val('');
+        $("#_unitPrice").val('');
+        $("#_unitInStock").val('');
+        $("#_unitOrder").val('');
+        $("#_reorder").val('');
+    }
+
+    var AddNewProduct = function () {
+        clearTextBox();
+        jQuery.noConflict();
+        $("#myInsertModal").modal();
+    };
+
+    var InsertProduct = function () {
+        var res = validate();
+        if (res == false)
+            return false;
+
+        var productName = $("#product_name").val();
+        var cate_id = $("#cate_id option:selected").val();
+        var sup_id = $("#supplier_id option:selected").val();
+        var quantityUnit = $("#_quantityPerUnit").val();
+        var unitPrice = $("#_unitPrice").val();
+        var unitStock = $("#_unitInStock").val();
+        var unitOrder = $("#_unitOrder").val();
+        var reorder = $("#_reorder").val();
+        var checkDiscount = $("input[name = _discontinued]:checked");
+        if (checkDiscount != null) {
+            var discontinue = checkDiscount.val();
+        }
+        var data = {
+            product_name: productName,
+            category_id: cate_id,
+            supplier_id: sup_id,
+            quantity_per_unit: quantityUnit,
+            unit_price: unitPrice,
+            units_in_stock: unitStock,
+            units_on_order: unitOrder,
+            reorder_level: reorder,
+            discontinued: discontinue
+        };
+        $.ajax({
+            url: "/Product/Create",
+            type: "POST",
+            data: JSON.stringify(data),
+            contentType: "application/json;charset=utf-8",
+            dataType: "json",
+            success: function (res) {
+                if (res.success) {
+                    filterLastPage();
+                    $("#myInsertModal").modal('hide');
+                }
+                else {
+                    $('.alert-danger').show();
+                    $('.alert-danger').text("Tên sản phẩm đã tồn tại !");
+                }
+            },
+            error: function (jqXhr, textStatus, errorMessage) {
+                console.log("Lỗi: ", errorMessage);
+            }
+        });
+    };
+
+    function getByID(productId) {
+        clearTextBox();
+        $.ajax({
+            url: "/Product/Edit/" + productId,
+            type: "GET",
+            contentType: "application/json;charset=utf-8",
+            dataType: "json",
+            success: function (res) {
+                $("#productId").val(productId);
+                $("#Name").val(res.product_name);
+                $("#cat_id").val(res.category_id);
+                $("#sup_id").val(res.supplier_id);
+                $("#quantity_per_unit").val(res.quantity_per_unit);
+                $("#unit_price").val(res.unit_price);
+                $("#units_in_stock").val(res.units_in_stock);
+                $("#units_on_order").val(res.units_on_order);
+                $("#reorder").val(res.reorder_level);
+                if (res.discontinued == 1) {
+                    $("#rd1").prop('checked', true);
+                }
+                else {
+                    $("#rd2").prop('checked', true);
+                }
+                jQuery.noConflict();
+                $("#myUpdateModal").modal();
+            },
+            error: function (jqXhr, textStatus, errorMessage) {
+                console.log("Lỗi: ", errorMessage);
+            }
+        });
+    };
+
+    var UpdateProduct = function () {
+        var productId = $("#productId").val();
+        var productName = $("#Name").val();
+        var categoryId = $("#cat_id option:selected").val();
+        var supplierId = $("#sup_id option:selected").val();
+        var quantityUnit = $("#quantity_per_unit").val();
+        var unitPrice = $("#unit_price").val();
+        var unitStock = $("#units_in_stock").val();
+        var unitOrder = $("#units_on_order").val();
+        var reorder = $("#reorder").val();
+        var checkDiscount = $("input[name=discontinued]:checked");
+        if (checkDiscount != null) {
+            var discontinued = checkDiscount.val();
+        }
+        var data = {
+            product_id: productId,
+            product_name: productName,
+            category_id: categoryId,
+            supplier_id: supplierId,
+            quantity_per_unit: quantityUnit,
+            unit_price: unitPrice,
+            units_in_stock: unitStock,
+            units_on_order: unitOrder,
+            reorder_level: reorder,
+            discontinued: discontinued
+        };
+        $.ajax({
+            url: "/Product/Edit",
+            type: "POST",
+            data: JSON.stringify(data),
+            contentType: "application/json;charset=utf-8",
+            dataType: "json",
+            success: function (res) {
+                if (res.success) {
+                    filter();
+                    $("#myUpdateModal").modal('hide');
+                }
+                else {
+                    $('.alert-danger').show();
+                    $('.alert-danger').text("Tên sản phẩm đã tồn tại !");
+                }
+            }
+        });
+    }
+
+    var deleteProduct = function () {
+        var result = confirm("Bạn có chắc muốn xóa sản phẩm này không ?");
+        if (result == true) {
+            var productId = $(this).attr("data-id");
+            $.ajax({
+                url: "/Product/Delete",
+                type: "GET",
+                data: { id: productId },
+                contentType: "application/json;charset=utf-8",
+                dataType: "json",
+            }).done(function (res) {
+                if (res.success) {
+                    alert(res.message);
+                    filter();
+                }
+                else {
+                    alert(res.message);
+                }
+            });
+        }
+        else {
+            return false;
+        }
+    };
+
+    var CategoryList = function () {
+        var keyword = $("#txtSearch").val();
+        var cateId = $("#categoryList").val();
+        var supId = $("#supplierList").val();
+        var discount = $("#discount").val();
+        var min = $("#minStock").val();
+        var max = $("#maxStock").val();
+        $("#main_table").html("Đang tải....");
+        if (cateId == 0) {
+            filter();
+        }
+        showListSup();
+        $.post("/Product/GetTable", {
+            searchString: keyword,
+            cateId: cateId,
+            supId: supId,
+            discount: discount,
+            minStock: min,
+            maxStock: max
+        }).then(xhr => {
+            $("#main_table").html(xhr);
+            reActivePagination();
+            $("[data-id]").on('click', deleteProduct);
+        });
+    };
+
+    var SupplierList = function () {
+        var keyword = $("#txtSearch").val();
+        var discount = $("#discount").val();
+        var cateId = $("#categoryList").val();
+        var supId = $("#supplierList").val();
+        var min = $("[name = minStock]").val();
+        var max = $("[name = maxStock]").val();
+        $("#main_table").html("Đang tải....");
+        $.post("/product/GetTable", {
+            searchString: keyword,
+            cateId: cateId,
+            supId: supId,
+            discount: discount,
+            minStock: min,
+            maxStock: max
+        }).then(xhr => {
+            $("#main_table").html(xhr);
+            reActivePagination();
+            $("[data-id]").on('click', deleteProduct);
+        });
+    }
+
+    var DisContinued = function () {
+        var keyword = $("#txtSearch").val();
+        var discount = $("#discount").val();
+        var cateId = $("#categoryList").val();
+        var supId = $("#supplierList").val();
+        var min = $("[name = minStock]").val();
+        var max = $("[name = maxStock]").val();
+        $("#main_table").html("Đang tải....");
+        $.post("/product/GetTable", {
+            searchString: keyword,
+            cateId: cateId,
+            supId: supId,
+            discount: discount,
+            minStock: min,
+            maxStock: max
+        }).then(xhr => {
+            $("#main_table").html(xhr);
+            reActivePagination();
+            $("[data-id]").on('click', deleteProduct);
+        });
+    };
+
+    var SearchStock = function () {
+        var keyword = $("#txtSearch").val();
+        var discount = $("#discount").val();
+        var cateId = $("#categoryList").val();
+        var supId = $("#supplierList").val();
+        var min = $("[name = minStock]").val();
+        var max = $("[name = maxStock]").val();
+        if (Number(min) > 0 && Number(max) > 0) {
+            if (Number(min) > Number(max)) {
+                alert("Nhập số lượng tồn không đúng !");
+                return false;
+            } else {
+                $("#main_table").html("Đang tải....");
+                $.post("/product/GetTable", {
+                    searchString: keyword,
+                    cateId: cateId,
+                    supId: supId,
+                    discount: discount,
+                    minStock: min,
+                    maxStock: max
+                }).then(xhr => {
+                    $("#main_table").html(xhr);
+                    reActivePagination();
+                    $("[data-id]").on('click', deleteProduct);
+                });
+            }
+        }
+        $("#main_table").html("Đang tải....");
+        $.post("/product/GetTable", {
+            searchString: keyword,
+            cateId: cateId,
+            supId: supId,
+            discount: discount,
+            minStock: min,
+            maxStock: max
+        }).then(xhr => {
+            $("#main_table").html(xhr);
+            reActivePagination();
+            $("[data-id]").on('click', deleteProduct);
+        });
+    };
+
+    function getDetailId(pId) {
+        clearTextBox();
+        $.ajax({
+            url: "/Product/Detail/" + pId,
+            type: "GET",
+            contentType: "application/json;charset=utf-8",
+            dataType: "json",
+            success: function (res) {
+                $("#productId").val(pId);
+                $("#nameDetail").val(res.product_name);
+                $("#cat_id_detail").val(res.category_id);
+                $("#sup_id_detail").val(res.supplier_id);
+                $("#quantity_per_unit_detail").val(res.quantity_per_unit);
+                $("#unit_price_detail").val(res.unit_price);
+                $("#units_in_stock_detail").val(res.units_in_stock);
+                $("#units_on_order_detail").val(res.units_on_order);
+                $("#reorder_detail").val(res.reorder_level);
+                if (res.discontinued == 1) {
+                    $("#giamgia1").prop('checked', true);
+                }
+                else {
+                    $("#giamgia2").prop('checked', true);
+                }
+                jQuery.noConflict();
+                $("#myDetailModal").modal();
+            },
+            error: function (jqXhr, textStatus, errorMessage) {
+                console.log("Lỗi: ", errorMessage);
+            }
+        });
+    }
+
+    var ExportExcel = function () {
+        var keyword = $("#txtSearch").val();
+        var cateId = $("#categoryList").val();
+        var supId = $("#supplierList").val();
+        var discount = $("#discount").val();
+        var min = $("[name = minStock]").val();
+        var max = $("[name = maxStock]").val();
+        $(this).attr('href', '/product/Export?searchString=' + keyword + '&cateId=' + cateId + '&supId=' + supId + '&discount=' + discount + '&minStock=' + min + '&maxStock=' + max + '');
+        return true;
+    };
+
+    function validate() {
+        var isValid = true;
+        if ($('#product_name').val().trim() == "") {
+            $('.alert-danger').show();
+            //$('#product_name').css("border-color", "Red");
+            $('.alert-danger').text("Vui lòng nhập đầy đủ thông tin !");
+            isValid = false;
+        }
+        else {
+            $('#product_name').css('border-color', 'lightgrey');
+        }
+        if ($('#_quantityPerUnit').val().trim() == "") {
+            $('.alert-danger').show();
+            //$('#_quantityPerUnit').css("border-color", "Red");
+            $('.alert-danger').text("Vui lòng nhập đầy đủ thông tin !");
+            isValid = false;
+        }
+        else {
+            $('#_quantityPerUnit').css('border-color', 'lightgrey');
+        }
+        if ($('#_unitPrice').val().trim() == "") {
+            $('.alert-danger').show();
+            //$('#_unitPrice').css("border-color", "Red");
+            $('.alert-danger').text("Vui lòng nhập đầy đủ thông tin !");
+            isValid = false;
+        }
+        else {
+            $('#_unitPrice').css('border-color', 'lightgrey');
+        }
+        if ($('#_unitInStock').val().trim() == "") {
+            $('.alert-danger').show();
+            //$('#_unitInStock').css("border-color", "Red");
+            $('.alert-danger').text("Vui lòng nhập đầy đủ thông tin !");
+            isValid = false;
+        }
+        else {
+            $('#_unitInStock').css('border-color', 'lightgrey');
+        }
+        if ($('#_unitOrder').val().trim() == "") {
+            $('.alert-danger').show();
+            //$('#_unitOrder').css("border-color", "Red");
+            $('.alert-danger').text("Vui lòng nhập đầy đủ thông tin !");
+            isValid = false;
+        }
+        else {
+            $('#_unitOrder').css('border-color', 'lightgrey');
+        }
+        if ($('#_reorder').val().trim() == "") {
+            $('.alert-danger').show();
+            //$('#_reorder').css("border-color", "Red");
+            $('.alert-danger').text("Vui lòng nhập đầy đủ thông tin !");
+            isValid = false;
+        }
+        else {
+            $('#_reorder').css('border-color', 'lightgrey');
+        }
+        return isValid;
+    }
+
+    var filter = function () {
+        var keyword = $("#txtSearch").val();
+        var cateId = $("#categoryList").val();
+        var page = $("ul.pagination li.active span").text();
+        var supId = $("#supplierList").val();
+        var discount = $("#discount").val();
+        var min = $("[name = minStock]").val();
+        var max = $("[name = maxStock]").val();
+        if (keyword.length > 0) {
+            getResultSearch();
+        }
+        $("#main_table").html("Đang tải....");
+        $.post("/product/GetTable", {
+            searchString: keyword,
+            cateId: cateId,
+            supId: supId,
+            discount: discount,
+            minStock: min,
+            maxStock: max,
+            page: page
+        }).then(xhr => {
+            $("#main_table").html(xhr);
+            reActivePagination();
+            $("[data-id]").on('click', deleteProduct);
+        });
+    };
+
+    var filterLastPage = function () {
+        var keyword = $("#txtSearch").val();
+        var cateId = $("#categoryList").val();
+        var lastpage = $("#lastpage").val();
+        var supId = $("#supplierList").val();
+        var discount = $("#discount").val();
+        var min = $("[name = minStock]").val();
+        var max = $("[name = maxStock]").val();
+        if (keyword.length > 0) {
+            getResultSearch();
+        }
+        $("#main_table").html("Đang tải....");
+        $.post("/product/GetTable", {
+            searchString: keyword,
+            cateId: cateId,
+            supId: supId,
+            discount: discount,
+            minStock: min,
+            maxStock: max,
+            page: lastpage
+        }).then(xhr => {
+            $("#main_table").html(xhr);
+            reActivePagination();
+            $("[data-id]").on('click', deleteProduct);
+        });
+    }
+
+    $(document).ready(function () {
+
+        filter();
+
+        toggleClearSearch();
+
+        $("#cat_id_detail").css('pointer-events', 'none');
+        $("#sup_id_detail").css('pointer-events', 'none');
+
+        $("#txtSearch").on("input", toggleClearSearch);
+
+        $("#btnSearch").on('click', filter);
+
+        $("#clearSearch span").on('click', deleteX);
+
+        $("#addNew").on('click', AddNewProduct);
+
+        $("#myInsertModal").find('.add').on('click', InsertProduct);
+
+        $("#myUpdateModal").find('.update').on('click', UpdateProduct);
+
+        $("#categoryList").on('change', CategoryList);
+
+        $("#supplierList").on('change', SupplierList);
+
+        $("#discount").on('change', DisContinued);
+
+        $("[name = searchStock]").on('click', SearchStock);
+
+        $("#btnKetXuat").on('click', ExportExcel);
+
+        $("#btnUpload").on('click', function () {
+            var fileUpload = $("[name = importFile]")[0];
+            var files = fileUpload.files[0];
+            var data = new FormData($('form#formUpload')[0]);
+            if (files != null) {
+                $.ajax({
+                    type: "POST",
+                    url: "/Product/Upload",
+                    contentType: false,
+                    processData: false,
+                    data: data
+                }).done(function (res) {
+                    if (res.status == "success") {
+                        filterLastPage();
+                        var ele = $("#inputFile");
+                        ele.wrap('<form>').closest('form').get(0).reset();
+                        ele.unwrap();
+                    }
+                    else if (res.status == "error") {
+                        alert(res.errors.join("\n"));
+                        filterLastPage();
+                        var ele1 = $("#inputFile");
+                        ele1.wrap('<form>').closest('form').get(0).reset();
+                        ele1.unwrap();
+                    }
+                    else {
+                        alert(res.message);
+                    }
+                });
+            }
+            else {
+                alert("Vui lòng chọn file !");
+                return false;
+            }
+        });
+    });
+</script>

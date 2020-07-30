@@ -1,0 +1,106 @@
+﻿@model IEnumerable<NetcoreMvcBasic.Business.Entities.Product>
+@{
+    //ViewData["Title"] = "Home Page";
+    Layout = null;
+}
+<link href="~/lib/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet" />
+<script src="~/lib/bootstrap/dist/js/bootstrap.min.js"></script>
+<script src="~/lib/jquery/dist/jquery.min.js"></script>
+
+<div class="container">
+    <div class="row">
+        <div class="col-md-12">
+            @if (Model.Count() > 0)
+            {
+                <table id="tblProduct" class="table table-hover table-bordered">
+
+                    <thead>
+
+                        <tr>
+                            <th>Id</th>
+                            <th>Tên hàng</th>
+                            <th>Danh mục</th>
+                            <th>Nhà cung cấp</th>
+                            <th>Quy cách</th>
+                            <th>Đơn giá</th>
+                            <th>Số lượng tồn kho</th>
+                            <th>Đơn vị xuất bán</th>
+                            <th>Mức độ đặt hàng lại</th>
+                            <th>Giảm giá</th>
+                            <th>Hành động</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+
+                        @foreach (var p in Model)
+                        {
+                            <tr>
+                                <td>@Html.DisplayFor(model => p.product_id)</td>
+                                <td>@Html.DisplayFor(model => p.product_name)</td>
+                                <td>@Html.DisplayFor(model => p.Category.category_name)</td>
+                                <td>@Html.DisplayFor(model => p.Supplier.company_name)</td>
+                                <td>@Html.DisplayFor(model => p.quantity_per_unit)</td>
+                                <td>@Html.DisplayFor(model => p.unit_price)</td>
+                                <td>@Html.DisplayFor(model => p.units_in_stock)</td>
+                                <td>@Html.DisplayFor(model => p.units_on_order)</td>
+                                <td>@Html.DisplayFor(model => p.reorder_level)</td>
+                                @if (p.discontinued == 1)
+                                {
+                                    <td>@Html.DisplayName("Có")</td>
+                                }
+                                else
+                                {
+                                    <td>@Html.DisplayName("Không")</td>
+                                }
+
+                                <td>
+                                    <a href="#" onclick="return getByID('@p.product_id');" class="btn btn-primary">Sửa</a>
+                                    <a href="#" data-id="@p.product_id" class="btn btn-danger">Xóa</a>
+                                    <a href="#" onclick="return getDetailId('@p.product_id')" class="btn btn-success">Xem</a>
+                                </td>
+                            </tr>
+
+                        }
+
+
+                    </tbody>
+                </table>
+            }
+            else
+            {
+                <label style="font-size:larger;color:red;" class="control-label">@Html.DisplayName("Không tìm thấy kết quả !")</label>
+            }
+
+        </div>
+
+
+
+    </div>
+    <div class="row">
+        <div class="col-md-6">
+            <ul class="pagination">
+                @for (int i = 1; i <= @ViewBag.TotalPage; i++)
+                {
+                    @if (i != @ViewBag.CurrentPage)
+                    {
+                        <li class="page-item">
+                            <a class="page-link" href="javascript:PagerClick(@i)">@i</a>
+                        </li>
+                    }
+                    else
+                    {
+                        <li class="page-item active">
+                            <span><a href="#" class="page-link">@i</a></span>
+                        </li>
+                    }
+                }
+            </ul>
+        </div>
+    </div>
+</div>
+<script type="text/javascript">
+    function PagerClick(index) {
+        filter();
+    }
+
+</script>
