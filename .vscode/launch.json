@@ -1,0 +1,26 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "NetcoreMvcBasic",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "build",
+            "program": "${workspaceFolder}/NetcoreMvcBasic/bin/Debug/netcoreapp2.2/NetcoreMvcBasic.dll",
+            "args": [],
+            "cwd": "${workspaceFolder}/NetcoreMvcBasic",
+            "stopAtEntry": false,
+            "serverReadyAction": {
+                "action": "openExternally",
+                "pattern": "^\\s*Now listening on:\\s+(https?://\\S+)"
+            },
+            "env": {
+                "ASPNETCORE_ENVIRONMENT": "Development"
+            },
+            "sourceFileMap": {
+                "/Views": "${workspaceFolder}/Views"
+            },
+            "requireExactSource": false
+        },
+    ]
+}
