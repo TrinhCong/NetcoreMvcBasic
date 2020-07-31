@@ -1,0 +1,9 @@
+/Users/cong.vietgis/Desktop/Others/NetcoreMvcBasic/NetcoreMvcBasic.Business/bin/Debug/netcoreapp2.2/NetcoreMvcBasic.Business.deps.json
+/Users/cong.vietgis/Desktop/Others/NetcoreMvcBasic/NetcoreMvcBasic.Business/bin/Debug/netcoreapp2.2/NetcoreMvcBasic.Business.dll
+/Users/cong.vietgis/Desktop/Others/NetcoreMvcBasic/NetcoreMvcBasic.Business/bin/Debug/netcoreapp2.2/NetcoreMvcBasic.Business.pdb
+/Users/cong.vietgis/Desktop/Others/NetcoreMvcBasic/NetcoreMvcBasic.Business/obj/Debug/netcoreapp2.2/NetcoreMvcBasic.Business.csprojAssemblyReference.cache
+/Users/cong.vietgis/Desktop/Others/NetcoreMvcBasic/NetcoreMvcBasic.Business/obj/Debug/netcoreapp2.2/NetcoreMvcBasic.Business.AssemblyInfoInputs.cache
+/Users/cong.vietgis/Desktop/Others/NetcoreMvcBasic/NetcoreMvcBasic.Business/obj/Debug/netcoreapp2.2/NetcoreMvcBasic.Business.AssemblyInfo.cs
+/Users/cong.vietgis/Desktop/Others/NetcoreMvcBasic/NetcoreMvcBasic.Business/obj/Debug/netcoreapp2.2/NetcoreMvcBasic.Business.csproj.CoreCompileInputs.cache
+/Users/cong.vietgis/Desktop/Others/NetcoreMvcBasic/NetcoreMvcBasic.Business/obj/Debug/netcoreapp2.2/NetcoreMvcBasic.Business.dll
+/Users/cong.vietgis/Desktop/Others/NetcoreMvcBasic/NetcoreMvcBasic.Business/obj/Debug/netcoreapp2.2/NetcoreMvcBasic.Business.pdb

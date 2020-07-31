@@ -1,10 +1,13 @@
 <Project Sdk="Microsoft.NET.Sdk">
+
   <PropertyGroup>
-    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <TargetFramework>netcoreapp2.2</TargetFramework>
   </PropertyGroup>
+
   <ItemGroup>
     <PackageReference Include="Microsoft.Extensions.Options" Version="2.2.0" />
     <PackageReference Include="Npgsql" Version="4.1.1" />
     <PackageReference Include="Smooth.IoC.Dapper.Repository.UnitOfWork" Version="0.5.9" />
   </ItemGroup>
+
 </Project>

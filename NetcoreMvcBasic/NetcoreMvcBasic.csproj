@@ -1,24 +1,28 @@
 <Project Sdk="Microsoft.NET.Sdk.Web">
+
   <PropertyGroup>
-    <TargetFramework>netcoreapp3.1</TargetFramework>
-    <UserSecretsId>aspnet-TelcoMan-6EF55D53-E46C-41D3-80D9-C51E6C3503C0</UserSecretsId>
-    <NoWin32Manifest>true</NoWin32Manifest>
+    <TargetFramework>netcoreapp2.2</TargetFramework>
+    <AspNetCoreHostingModel>InProcess</AspNetCoreHostingModel>
   </PropertyGroup>
+
+
   <ItemGroup>
-    <PackageReference Include="Autofac.Extensions.DependencyInjection" Version="5.0.1"/>
-    <PackageReference Include="bootstrap" Version="4.5.0"/>
-    <PackageReference Include="EPPlus" Version="4.5.3"/>
-    <PackageReference Include="jQuery" Version="3.3.1"/>
-    <PackageReference Include="Microsoft.AspNetCore.App"/>
-    <PackageReference Include="Microsoft.AspNetCore.Razor.Design" Version="2.2.0" PrivateAssets="All"/>
-    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="3.1.6"/>
-    <PackageReference Include="Microsoft.Extensions.DependencyModel" Version="3.0.0"/>
-    <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="3.0.0"/>
-    <PackageReference Include="Npgsql" Version="4.1.1"/>
-    <PackageReference Include="Smooth.IoC.Dapper.Repository.UnitOfWork" Version="0.5.9"/>
-    <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="3.1.6"/>
+    <PackageReference Include="Autofac.Extensions.DependencyInjection" Version="5.0.1" />
+    <PackageReference Include="bootstrap" Version="4.5.0" />
+    <PackageReference Include="EPPlus" Version="4.5.3" />
+    <PackageReference Include="jQuery" Version="3.3.1" />
+    <PackageReference Include="Microsoft.AspNetCore.App" />
+    <PackageReference Include="Microsoft.AspNetCore.Razor.Design" Version="2.2.0" PrivateAssets="All" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="2.2.0" />
+    <PackageReference Include="Microsoft.Extensions.DependencyModel" Version="3.0.0" />
+    <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="3.0.0" />
+    <PackageReference Include="Npgsql" Version="4.1.1" />
+    <PackageReference Include="Smooth.IoC.Dapper.Repository.UnitOfWork" Version="0.5.9" />
   </ItemGroup>
+
+
   <ItemGroup>
-    <ProjectReference Include="..\NetcoreMvcBasic.Business\NetcoreMvcBasic.Business.csproj"/>
+    <ProjectReference Include="..\NetcoreMvcBasic.Business\NetcoreMvcBasic.Business.csproj" />
   </ItemGroup>
+
 </Project>
